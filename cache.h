@@ -582,6 +582,7 @@ extern int read_replace_refs;
 extern int fsync_object_files;
 extern int core_preload_index;
 extern int core_apply_sparse_checkout;
+extern int core_clock_skew;
 
 enum branch_track {
 	BRANCH_TRACK_UNSPECIFIED = -1,
