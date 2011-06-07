@@ -74,6 +74,7 @@ def do_capabilities(repo, args):
     print "refspec refs/heads/*:%s*" % repo.prefix
 
     print # end capabilities
+    return True
 
 
 def do_list(repo, args):
@@ -96,6 +97,7 @@ def do_list(repo, args):
         print "@refs/heads/master HEAD"
 
     print # end list
+    return True
 
 
 def update_local_repo(repo):
@@ -123,6 +125,7 @@ def do_import(repo, args):
 
     repo = update_local_repo(repo)
     repo.exporter.export_repo(repo.gitdir)
+    return True
 
 
 def do_export(repo, args):
@@ -148,6 +151,7 @@ def do_export(repo, args):
     update_local_repo(repo)
     repo.importer.do_import(repo.gitdir)
     repo.non_local.push(repo.gitdir)
+    return False
 
 
 def do_gitdir(repo, args):
@@ -158,6 +162,7 @@ def do_gitdir(repo, args):
         die("gitdir needs an argument")
 
     repo.gitdir = ' '.join(args)
+    return True
 
 
 COMMANDS = {
@@ -203,7 +208,8 @@ def read_one_line(repo):
         die("Unknown command, %s", cmd)
 
     func = COMMANDS[cmd]
-    func(repo, cmdline)
+    if not func(repo, cmdline):
+            return False
     sys.stdout.flush()
 
     return True
