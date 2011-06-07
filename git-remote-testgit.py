@@ -113,9 +113,13 @@ def update_local_repo(repo):
     return repo
 
 
+to_import = []
 def do_import(repo, args):
-    """Exports a fast-import stream from testgit for git to import.
+    """Collect a set of refs to import; we must do the final
+       import at the end, since we only want to exec fast-export
+       once.
     """
+    global to_import
 
     if len(args) != 1:
         die("Import needs exactly one ref")
@@ -123,9 +127,22 @@ def do_import(repo, args):
     if not repo.gitdir:
         die("Need gitdir to import")
 
-    repo = update_local_repo(repo)
-    repo.exporter.export_repo(repo.gitdir, args)
+    to_import.append(args[0])
     return True
+
+
+def finalize_import(repo):
+    """Exports a fast-import stream from testgit for git to import;
+       we should have collected the list of refs already in
+       to_import.
+    """
+    global to_import
+
+    if len(to_import) == 0:
+            return
+
+    repo = update_local_repo(repo)
+    repo.exporter.export_repo(repo.gitdir, to_import)
 
 
 def do_export(repo, args):
@@ -199,6 +216,7 @@ def read_one_line(repo):
     cmdline = cmdline.strip().split()
     if not cmdline:
         # Blank line means we're about to quit
+        finalize_import(repo)
         return False
 
     cmd = cmdline.pop(0)
